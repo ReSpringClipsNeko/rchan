@@ -1,0 +1,49 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Test
+        run: cargo test
+
+      - name: Prepare asset
+        run: |
+          set -euxo pipefail
+          BIN="rchan"
+          mkdir -p dist
+
+          cp "target/release/${BIN}" "dist/${BIN}"
+          chmod +x "dist/${BIN}"
+
+          SHA="$(sha256sum "dist/${BIN}" | awk '{print $1}')"
+          echo "${SHA}  ${BIN}" > "dist/${BIN}.sha256"
+
+      - name: Create GitHub Release and upload binary
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/rchan
+            dist/rchan.sha256
