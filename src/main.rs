@@ -12,8 +12,19 @@ fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
     // Subcommand dispatch
-    if args.len() > 1 && args[1] == "build" {
-        return builder::run_build(&cwd);
+    if args.len() > 1 {
+        match args[1].as_str() {
+            "build" => return builder::run_build(&cwd),
+            "--help" | "-h" => {
+                print_help();
+                return Ok(());
+            }
+            other => {
+                eprintln!("{} unknown command '{}'\n", "error:".red().bold(), other);
+                print_help();
+                std::process::exit(1);
+            }
+        }
     }
 
     // Default behavior: check for updates
@@ -81,4 +92,19 @@ fn main() -> Result<()> {
     );
 
     Ok(())
+}
+
+fn print_help() {
+    let version = env!("CARGO_PKG_VERSION");
+    println!(
+        "{} {} {}",
+        "rchan".bold().cyan(),
+        version,
+        "- PKGBUILD update checker & builder".dimmed()
+    );
+    println!();
+    println!("{}", "USAGE:".bold());
+    println!("  rchan              Check PKGBUILD updates for all packages");
+    println!("  rchan build        Build all packages with makepkg");
+    println!("  rchan --help, -h   Show this help message");
 }
