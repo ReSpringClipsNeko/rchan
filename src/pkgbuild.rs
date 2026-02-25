@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use regex::Regex;
 
-/// PKGBUILD 中提取的版本信息
+/// Version information extracted from a PKGBUILD
 #[derive(Debug, Clone, PartialEq)]
 pub struct PkgVersion {
     pub pkgver: String,
@@ -14,9 +14,9 @@ impl std::fmt::Display for PkgVersion {
     }
 }
 
-/// 从 PKGBUILD 文本内容中提取 pkgver 和 pkgrel
+/// Extract pkgver and pkgrel from PKGBUILD text content
 ///
-/// 按 Arch Linux 官方规范，格式为无引号直接赋值：
+/// Per Arch Linux official spec, the format is unquoted direct assignment:
 ///   pkgver=1.02.3
 ///   pkgrel=1
 pub fn parse_pkgbuild(content: &str) -> Result<PkgVersion> {
@@ -38,14 +38,14 @@ pub fn parse_pkgbuild(content: &str) -> Result<PkgVersion> {
     Ok(PkgVersion { pkgver, pkgrel })
 }
 
-/// 从本地文件解析 PKGBUILD
+/// Parse a PKGBUILD from a local file
 pub fn parse_local(path: &std::path::Path) -> Result<PkgVersion> {
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("Failed to read PKGBUILD: {}", path.display()))?;
     parse_pkgbuild(&content)
 }
 
-/// 从远程 URL 获取并解析 PKGBUILD
+/// Fetch and parse a PKGBUILD from a remote URL
 pub fn parse_remote(url: &str) -> Result<PkgVersion> {
     let content = reqwest::blocking::get(url)
         .with_context(|| format!("Failed to fetch remote PKGBUILD: {url}"))?

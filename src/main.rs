@@ -1,3 +1,4 @@
+mod builder;
 mod config;
 mod pkgbuild;
 mod scanner;
@@ -8,6 +9,14 @@ use scanner::ScanResult;
 
 fn main() -> Result<()> {
     let cwd = std::env::current_dir()?;
+    let args: Vec<String> = std::env::args().collect();
+
+    // Subcommand dispatch
+    if args.len() > 1 && args[1] == "build" {
+        return builder::run_build(&cwd);
+    }
+
+    // Default behavior: check for updates
     println!(
         "{} {}",
         "rchan".bold().cyan(),

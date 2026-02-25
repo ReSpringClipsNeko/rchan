@@ -5,28 +5,28 @@ use anyhow::Result;
 use crate::config::RchanConfig;
 use crate::pkgbuild;
 
-/// 扫描结果枚举
+/// Scan result enum
 pub enum ScanResult {
-    /// 远程版本已更新
+    /// Remote version has been updated
     Updated {
         name: String,
         local_ver: String,
         remote_ver: String,
     },
-    /// 版本一致，无需更新
+    /// Versions match, no update needed
     UpToDate {
         name: String,
         local_ver: String,
     },
-    /// 处理过程中出错
+    /// An error occurred during processing
     Error {
         name: String,
         message: String,
     },
 }
 
-/// 扫描当前目录下所有子目录（深度一层）
-/// 查找同时包含 rchan.yaml 和 PKGBUILD 的子目录
+/// Scan all subdirectories (one level deep) under the current directory
+/// looking for those containing both rchan.yaml and PKGBUILD
 pub fn scan_directory(base: &Path) -> Result<Vec<ScanResult>> {
     let mut results = Vec::new();
 
@@ -36,7 +36,7 @@ pub fn scan_directory(base: &Path) -> Result<Vec<ScanResult>> {
         let entry = entry?;
         let path = entry.path();
 
-        // 只处理目录
+        // Only process directories
         if !path.is_dir() {
             continue;
         }
@@ -44,7 +44,7 @@ pub fn scan_directory(base: &Path) -> Result<Vec<ScanResult>> {
         let rchan_yaml = path.join("rchan.yaml");
         let pkgbuild_path = path.join("PKGBUILD");
 
-        // 跳过没有 rchan.yaml 或 PKGBUILD 的目录
+        // Skip directories without rchan.yaml or PKGBUILD
         if !rchan_yaml.exists() || !pkgbuild_path.exists() {
             continue;
         }
@@ -59,7 +59,7 @@ pub fn scan_directory(base: &Path) -> Result<Vec<ScanResult>> {
         results.push(result);
     }
 
-    // 按名称排序，输出更整齐
+    // Sort by name for cleaner output
     results.sort_by(|a, b| {
         let name_a = match a {
             ScanResult::Updated { name, .. } => name,
@@ -77,7 +77,7 @@ pub fn scan_directory(base: &Path) -> Result<Vec<ScanResult>> {
     Ok(results)
 }
 
-/// 检查单个包：比较本地和远程 PKGBUILD 版本
+/// Check a single package: compare local and remote PKGBUILD versions
 fn check_package(name: &str, rchan_yaml: &Path, pkgbuild_path: &Path) -> ScanResult {
     let config = match RchanConfig::from_file(rchan_yaml) {
         Ok(c) => c,
