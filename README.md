@@ -6,6 +6,8 @@ In that repository, contains upper level of the PKGBUILDs...
 
 Run `rchan`, it will check PKGBUILD update by the remote PKGBUILD url in `rchan.yaml`.
 
+For auto build(no warranty), use `rchan build`.
+
 ## Why not lilac
 [lilac](https://github.com/archlinuxcn/lilac) is the bot of [archlinuxcn](https://github.com/archlinuxcn).
 
